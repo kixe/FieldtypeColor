@@ -1,0 +1,160 @@
+<?php
+
+/**
+ * ProcessWire Color Fieldtype
+ * Field that stores an 32Bit unsigned integer value to hold RGB colors and Alpha channel
+ *
+ * @author Christoph Thelen aka @kixe 2017/07/03
+ * @copyright © 2017 Christoph Thelen
+ * @license 
+ * @link https://processwire.com/talk/topic/...
+ * @version 1.0.0
+ * @since 1.0.0 init - 2017/07/03
+ * 
+ * made for ProcessWire 2.x, 3.x, Copyright 2016 by Ryan Cramer
+ * https://processwire.com
+ * 
+ */
+
+class FieldtypeColor extends Fieldtype {
+
+	public static function getModuleInfo() {
+		return array(
+			'title' => 'Color',
+			'version' => 100,
+			'summary' => 'Field that stores a color value as 32bit integer',
+			'installs' => 'InputfieldColor'
+			);
+	}
+
+	public function ___getCompatibleFieldtypes(Field $field) {
+		//return null;
+        $fieldtypes = $this->wire(new Fieldtypes());
+        foreach($this->wire('fieldtypes') as $fieldtype) {
+            if(!$fieldtype instanceof FieldtypeInteger &&
+            	!$fieldtype instanceof FieldtypeColor &&
+            	$fieldtype != 'FieldtypeText') {
+                $fieldtypes->remove($fieldtype);
+            }
+        }
+        return $fieldtypes; 
+	}
+
+	public function getInputfield(Page $page, Field $field) {
+		$inputfield = $this->modules->get('InputfieldColor'); 
+		$inputfield->class = $this->className();
+		return $inputfield; 
+	}
+	
+	public function sanitizeValue(Page $page, Field $field, $value) {
+
+		if (!$value) return null;
+		$value = ltrim($value, '#');
+		if (strlen($value) == 8) return $value;
+		if (strlen($value) == 6) return 'ff'.$value; // add alpha channel
+		return null;
+		// else throw New WireException('Expecting 24 Bit Hex color string (length 6 or 8 digits)');
+	}
+
+	public function sleepValue(Page $page, Field $field, $value) {
+		return hexdec($value);
+	}
+
+	public function wakeupValue(Page $page, Field $field, $value) {
+		$value = str_pad(dechex($value), 8, '0', STR_PAD_LEFT);
+		return $value;
+	}
+
+	/**
+	 * Converts an RGB color value to HSL. Conversion formula
+	 * @param array of 3 color values R, G, and B [0, 255]
+	 * @return array The HSL representation
+	 *
+	 * @see https://stackoverflow.com/questions/2353211/hsl-to-rgb-color-conversion/9493060#9493060
+	 * @see http://en.wikipedia.org/wiki/HSL_color_space
+	 */
+	public function RGB2HSL(array $rgb) {
+		$rgb = array_map(function($v) { return $v/ 255; }, $rgb);
+	    $max = max($rgb);
+	    $min = min($rgb);
+	    $hue = $sat = $light = ($max + $min) / 2;
+
+	    if($max == $min) {
+	        $hue = $sat = 0; // achromatic
+	    } else {
+	        $d = $max - $min;
+	        $sat = $light > 0.5 ? $d / (2 - $max - $min) : $d / ($max + $min);
+	        switch($max) {
+	            case $rgb[0]:
+		            $hue = ($rgb[1] - $rgb[1]) / $d + ($rgb[1] < $rgb[1] ? 6 : 0);
+		            break;
+	            case $rgb[1]:
+	            	$hue = ($rgb[2] - $rgb[0]) / $d + 2;
+	            	break;
+	            case $rgb[2]:
+	            	$hue = ($rgb[0] - $rgb[1]) / $d + 4;
+	            	break;
+	        }
+	        $hue = $hue / 6;
+	    }
+	    $hue = round($hue * 360);
+	    $sat = round($sat * 100);
+	    $light = round($light * 100);
+
+	    return [$hue, $sat, $light];
+	}
+
+	/**
+	 * Format value for output
+	 *
+	 */
+	public function ___formatValue(Page $page, Field $field, $value) {
+		if ($field->outputFormat === 6) return $this->sleepValue($page, $field, $value);
+		return $this->formatColorString($value, $field->outputFormat);
+	}
+
+	public function formatColorString($value, $of = 0) {
+		if ($of === 6) return $value;
+		if ($of === 0) return "#".substr($value,2);
+		if ($of === 1) return "#".$value;
+
+		$value = array_map('hexdec', str_split($value, 2));
+		if (in_array($of ,array(3,5))) $opacity = round($value[0] / 255, 2);
+
+		if ($of === 2) return "rgb($value[1], $value[2], $value[3])";
+		if ($of === 3) return "rgba($value[1], $value[2], $value[3], $opacity)";	
+
+		$hsl = $this->RGB2HSL(array_slice($value,1,3));
+
+		if ($of === 4) return "hsl($hsl[0], $hsl[1]%, $hsl[2]%)";
+		if ($of === 5) return "hsla($hsl[0], $hsl[1]%, $hsl[2]%, $opacity)";
+	}
+
+	public function getDatabaseSchema(Field $field) {
+		$schema = parent::getDatabaseSchema($field);
+		$schema['data'] = "int UNSIGNED NOT NULL";
+		return $schema;
+	}
+
+	public function ___getConfigInputfields(Field $field) {
+
+		$inputfields = $this->wire(new InputfieldWrapper());
+
+		$f = $this->wire('modules')->get('InputfieldRadios'); 
+		$f->attr('name', 'outputFormat');
+		$f->label = $this->_('Output Format');
+
+		$f->addOption(0, $this->_('string 6-digit hex color *#fa4496*'));
+		$f->addOption(1, $this->_('string 8-digit hex color *#fa4496dd* (limited browser support)'));
+		$f->addOption(2, $this->_('string *rgb(255, 0, 0)*'));
+		$f->addOption(3, $this->_('string *rgba(255, 0, 0, 0.5)*'));
+		$f->addOption(4, $this->_('string *hsl(360, 50%, 0%)*')); 
+		$f->addOption(5, $this->_('string *hsla(360, 50%, 0%, 0.5)*'));
+		$f->addOption(6, $this->_('string 8-digit raw hex *fa4496dd*'));
+		$f->addOption(7, $this->_('int 32bit (unformatted)'));
+		$f->attr('value', (int) $field->outputFormat);
+		$inputfields->add($f); 
+		
+		return $inputfields; 
+	}
+}
