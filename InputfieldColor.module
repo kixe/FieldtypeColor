@@ -116,7 +116,7 @@ class InputfieldColor extends Inputfield {
 
 		$out = "<input " . $this->getAttributesString($attrs) . " />";
 		if( $this->inputType == 3) {
-			$options = $this->spectrum? str_replace(array(",\n","\n"),", ", trim($this->spectrum,",\t\n\r\0\x0B")) : '';
+			$options = $this->spectrum? str_replace(array(",\n","\n"),", ", trim($this->spectrum,",\t\n\r\0\x0B")).',' : '';
 			$value = $color32? $color32 : '#00000000';
 			$out .= "<script>
 				$(\"#$this->id\").spectrum({
