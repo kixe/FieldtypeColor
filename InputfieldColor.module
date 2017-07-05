@@ -45,7 +45,7 @@ class InputfieldColor extends Inputfield {
 
 	public function init() {
 		$this->inputType = 0;
-		$this->spectrum =  null;
+		$this->spectrum =  '';
 		parent::init();
 	}
 
