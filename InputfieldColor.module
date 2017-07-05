@@ -24,6 +24,7 @@ class InputfieldColor extends Inputfield {
 			'title' => __('Color', __FILE__), // Module Title
 			'summary' => __('Inputfield for colors', __FILE__), // Module Summary
 			'version' => 101,
+			'href' => 'https://processwire.com/talk/topic/16679-fieldtypecolor/'
 			);
 	}
 
@@ -119,7 +120,7 @@ class InputfieldColor extends Inputfield {
 			$value = $color32? $color32 : '#00000000';
 			$out .= "<script>
 				$(\"#$this->id\").spectrum({
-				    $options,
+				    $options
 				    color: \"$value\",
 				    change: function(color) {
 				    	this.value = color.toHex8String(); 
