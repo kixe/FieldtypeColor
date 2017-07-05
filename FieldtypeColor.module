@@ -6,10 +6,10 @@
  *
  * @author Christoph Thelen aka @kixe 2017/07/03
  * @copyright © 2017 Christoph Thelen
- * @license 
+ * @license Licensed under GNU/GPL v3
  * @link https://processwire.com/talk/topic/...
- * @version 1.0.0
- * @since 1.0.0 init - 2017/07/03
+ * @version 1.0.1
+ * @since 1.0.1 init - 2017/07/05 - better validation, spectrum options modifiable
  * 
  * made for ProcessWire 2.x, 3.x, Copyright 2016 by Ryan Cramer
  * https://processwire.com
@@ -28,7 +28,6 @@ class FieldtypeColor extends Fieldtype {
 	}
 
 	public function ___getCompatibleFieldtypes(Field $field) {
-		//return null;
         $fieldtypes = $this->wire(new Fieldtypes());
         foreach($this->wire('fieldtypes') as $fieldtype) {
             if(!$fieldtype instanceof FieldtypeInteger &&
@@ -47,13 +46,12 @@ class FieldtypeColor extends Fieldtype {
 	}
 	
 	public function sanitizeValue(Page $page, Field $field, $value) {
-
-		if (!$value) return null;
+		if (!$value) return 0;
 		$value = ltrim($value, '#');
 		if (strlen($value) == 8) return $value;
-		if (strlen($value) == 6) return 'ff'.$value; // add alpha channel
-		return null;
-		// else throw New WireException('Expecting 24 Bit Hex color string (length 6 or 8 digits)');
+		else if (strlen($value) == 6) return 'ff'.$value; // add alpha channel
+		else throw New WireException('Expecting Hex color string (length 6 or 8 digits) with optional leading \'#\'');
+
 	}
 
 	public function sleepValue(Page $page, Field $field, $value) {
@@ -61,6 +59,7 @@ class FieldtypeColor extends Fieldtype {
 	}
 
 	public function wakeupValue(Page $page, Field $field, $value) {
+		if (!$value) return null;
 		$value = str_pad(dechex($value), 8, '0', STR_PAD_LEFT);
 		return $value;
 	}
@@ -109,6 +108,7 @@ class FieldtypeColor extends Fieldtype {
 	 *
 	 */
 	public function ___formatValue(Page $page, Field $field, $value) {
+		if (!$value) return null;
 		if ($field->outputFormat === 6) return $this->sleepValue($page, $field, $value);
 		return $this->formatColorString($value, $field->outputFormat);
 	}
@@ -144,12 +144,12 @@ class FieldtypeColor extends Fieldtype {
 		$f->attr('name', 'outputFormat');
 		$f->label = $this->_('Output Format');
 
-		$f->addOption(0, $this->_('string 6-digit hex color *#fa4496*'));
+		$f->addOption(0, $this->_('string 6-digit hex color *#4496dd*'));
 		$f->addOption(1, $this->_('string 8-digit hex color *#fa4496dd* (limited browser support)'));
-		$f->addOption(2, $this->_('string *rgb(255, 0, 0)*'));
-		$f->addOption(3, $this->_('string *rgba(255, 0, 0, 0.5)*'));
-		$f->addOption(4, $this->_('string *hsl(360, 50%, 0%)*')); 
-		$f->addOption(5, $this->_('string *hsla(360, 50%, 0%, 0.5)*'));
+		$f->addOption(2, $this->_('string *rgb(68, 100, 221)*'));
+		$f->addOption(3, $this->_('string *rgba(68, 100, 221, 0.98)*'));
+		$f->addOption(4, $this->_('string *hsl(227, 69.2%, 56.7%)*')); 
+		$f->addOption(5, $this->_('string *hsla(227, 69.2%, 56.7%, 0.98)*'));
 		$f->addOption(6, $this->_('string 8-digit raw hex *fa4496dd*'));
 		$f->addOption(7, $this->_('int 32bit (unformatted)'));
 		$f->attr('value', (int) $field->outputFormat);
