@@ -22,13 +22,13 @@ Options modifiable
 Define output format under **Details** - Tab in field settings. Select from the following options:
 
 + *string* 6-digit hex color. Example: **'#4496dd'**
-+ *string* 8-digit hex color (limited browser support).	 Example: **'#fa4496dd'**
-+ *string* CSS color value RGB. Example: **'rgb(68, 100, 221)'**
-+ *string* CSS color value RGB. Example: **'rgba(68, 100, 221, 0.98)'**
-+ *string* CSS color value RGB. Example: **'hsl(227, 69.2%, 56.7%)'**
-+ *string* CSS color value RGB. Example: **'hsla(227, 69.2%, 56.7%, 0.98)'**
++ *string* 8-digit hex color with leading Alpha channel (limited browser support).	 Example: **'#fa4496dd'**
++ *string* CSS color value **RGB**. Example: **'rgb(68, 100, 221)'**
++ *string* CSS color value **RGBA**. Example: **'rgba(68, 100, 221, 0.98)'**
++ *string* CSS color value **HSL**. Example: **'hsl(227, 69.2%, 56.7%)'**
++ *string* CSS color value **HSLA**. Example: **'hsla(227, 69.2%, 56.7%, 0.98)'**
 + *string* 32bit raw hex value. Example: **'fa4496dd'**
-+ *int* 32bit. Example: **'4198799069'** (unformatted storage value)
++ *int 32bit*. Example: **'4198799069'** (unformatted storage value)
 		
 		
 The Fieldtype includes
