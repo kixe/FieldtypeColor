@@ -98,8 +98,8 @@ class FieldtypeColor extends Fieldtype {
 	        $hue = $hue / 6;
 	    }
 	    $hue = round($hue * 360);
-	    $sat = round($sat * 100);
-	    $light = round($light * 100);
+	    $sat = round($sat * 100, 1);
+	    $light = round($light * 100, 1);
 
 	    return [$hue, $sat, $light];
 	}
