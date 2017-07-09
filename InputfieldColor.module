@@ -7,8 +7,9 @@
  * @copyright © 2017 Christoph Thelen
  * @license Licensed under GNU/GPL v3
  * @link https://processwire.com/talk/topic/...
- * @version 1.0.1
- * @since 1.0.1 init - 2017/07/05 - better validation, spectrum options modifiable
+ * @version 1.0.2
+ * @since 1.0.1 2017/07/05 - better validation, spectrum options modifiable
+ * @since 1.0.2 2017/07/09 - added default value option
  * 
  * made for ProcessWire 2.x, 3.x, Copyright 2016 by Ryan Cramer
  * https://processwire.com
@@ -23,7 +24,7 @@ class InputfieldColor extends Inputfield {
 		return array(
 			'title' => __('Color', __FILE__), // Module Title
 			'summary' => __('Inputfield for colors', __FILE__), // Module Summary
-			'version' => 101,
+			'version' => 102,
 			'href' => 'https://processwire.com/talk/topic/16679-fieldtypecolor/'
 			);
 	}
@@ -40,7 +41,7 @@ class InputfieldColor extends Inputfield {
 		$this->setAttribute('type', 'text'); 
 		$this->setAttribute('size', 10); 
 		$this->setAttribute('placeholder', '#000000');
-		$this->setAttribute('pattern', '#[a-fA-F\d]{6}');
+		$this->setAttribute('pattern', '(#[a-fA-F\d]{6})?');
 	}
 
 	public function init() {
@@ -72,7 +73,12 @@ class InputfieldColor extends Inputfield {
 
 	public function ___render() {
 
-		if ($this->value) {
+		if ($this->value === 0 && strlen($this->initValue)) {
+			$color32 = $this->initValue;
+			$color24 = $bgColor = "#".substr($this->initValue,3,6);		
+			$value = array_map('hexdec', str_split(substr($this->initValue,1), 2));
+		}
+		else if ($this->value) {
 			$color32 = "#".$this->value;
 			$color24 = $bgColor = "#".substr($this->value,2,6);		
 			$value = array_map('hexdec', str_split($this->value, 2));
@@ -99,12 +105,13 @@ class InputfieldColor extends Inputfield {
 				$this->attr('value', $color32);
 				$this->attr('style', "color: $textColor; background: $bgColor; background-image: linear-gradient($rgba, $rgba), url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAIAAADZF8uwAAAAGUlEQVQYV2M4gwH+YwCGIasIUwhT25BVBADtzYNYrHvv4gAAAABJRU5ErkJggg==');");
 				$this->attr('placeholder', '#ff000000');
-				$this->attr('pattern', '#[a-fA-F\d]{8}');
+				$this->attr('pattern', '(#[a-fA-F\d]{8})?');
 				break;
 			case 3:
+				if (!$color32) $color32 = '#00000000';
 				$this->attr('value', $color32);
 				$this->attr('placeholder', '#ff000000');
-				$this->attr('pattern', '#[a-fA-F\d]{8}');
+				$this->attr('pattern', '(#[a-fA-F\d]{8})?');
 				break;
 		}
 
@@ -117,7 +124,7 @@ class InputfieldColor extends Inputfield {
 		$out = "<input " . $this->getAttributesString($attrs) . " />";
 		if( $this->inputType == 3) {
 			$options = $this->spectrum? str_replace(array(",\n","\n"),", ", trim($this->spectrum,",\t\n\r\0\x0B")).',' : '';
-			$value = $color32? $color32 : '#00000000';
+			$value = $color32? $color32 : null;
 			$out .= "<script>
 				$(\"#$this->id\").spectrum({
 				    $options
