@@ -12,9 +12,9 @@ Select between **4 types of Inputfields**
 + Inputfield type='text' expecting a 24bit hexcode string (RGB). Input format: *'#4496dd'*  
 The background color of the input fields shows selected color
 + Inputfield of type='text' expecting 32bit hexcode strings (RGB + alpha channel) Input format: *'#fa4496dd'*  
-+ Inputfield with **Spectrum Color Picker** (Javascript)  
++ Inputfield with **Spectrum Color Picker** (JavaScript)  
 Options modifiable
-
++ Inputfield type='text' with **custom JavaScript** and/or CSS
 
 
 ## Output
