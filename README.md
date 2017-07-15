@@ -6,7 +6,7 @@ FieldtypeColor
 Fieldtype stores a 32bit integer value reflecting a RGBA value.
 
 ## Inputfield  
-Select between **4 types of Inputfields** 
+Select between **5 types of Inputfields** 
  
 + Html5 Inputfield of type='color' (if supported by browser)   
 + Inputfield type='text' expecting a 24bit hexcode string (RGB). Input format: *'#4496dd'*  
