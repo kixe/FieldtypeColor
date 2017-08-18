@@ -7,10 +7,11 @@
  * @copyright © 2017 Christoph Thelen
  * @license Licensed under GNU/GPL v3
  * @link https://processwire.com/talk/topic/...
- * @version 1.0.3
+ * @version 1.0.4
  * @since 1.0.1 2017/07/05 - better validation, spectrum options modifiable
  * @since 1.0.2 2017/07/09 - added default value option
  * @since 1.0.3 2017/07/09 - added option for custom javascript
+ * @since 1.0.4 2017/08/18 - made # optional for input (pattern attribute)
  * 
  * made for ProcessWire 2.x, 3.x, Copyright 2016 by Ryan Cramer
  * https://processwire.com
@@ -25,7 +26,7 @@ class InputfieldColor extends Inputfield {
 		return array(
 			'title' => __('Color', __FILE__), // Module Title
 			'summary' => __('Inputfield for colors', __FILE__), // Module Summary
-			'version' => 103,
+			'version' => 104,
 			'href' => 'https://processwire.com/talk/topic/16679-fieldtypecolor/'
 			);
 	}
@@ -42,7 +43,7 @@ class InputfieldColor extends Inputfield {
 		$this->setAttribute('type', 'text'); 
 		$this->setAttribute('size', 10); 
 		$this->setAttribute('placeholder', '#000000');
-		$this->setAttribute('pattern', '(#[a-fA-F\d]{6})?');
+		$this->setAttribute('pattern', '(#?[a-fA-F\d]{6})?');
 	}
 
 	public function init() {
@@ -117,14 +118,14 @@ class InputfieldColor extends Inputfield {
 				$this->attr('value', $color32);
 				$this->attr('style', "color: $textColor; background: $bgColor; background-image: linear-gradient($rgba, $rgba), url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAIAAADZF8uwAAAAGUlEQVQYV2M4gwH+YwCGIasIUwhT25BVBADtzYNYrHvv4gAAAABJRU5ErkJggg==');");
 				$this->attr('placeholder', '#ff000000');
-				$this->attr('pattern', '(#[a-fA-F\d]{8})?');
+				$this->attr('pattern', '(#?[a-fA-F\d]{8})?');
 				break;
 			case 3:
 				$this->alpha = 1;
 				if (!$color32) $color32 = '#00000000';
 				$this->attr('value', $color32);
 				$this->attr('placeholder', '#ff000000');
-				$this->attr('pattern', '(#[a-fA-F\d]{8})?');
+				$this->attr('pattern', '(#?[a-fA-F\d]{8})?');
 				break;
 			case 4:
 				if ($this->alpha) $this->attr('value', $color32);
@@ -171,7 +172,7 @@ class InputfieldColor extends Inputfield {
 		parent::___processInput($input);
 		$value = $this->attr('value');
 		if (!$value) return $this;		
-		$pattern = $this->alpha? '/#[a-fA-F\d]{8}/' : '/#[a-fA-F\d]{6}/';
+		$pattern = $this->alpha? '/#?[a-fA-F\d]{8}/' : '/#?[a-fA-F\d]{6}/';
 		if(!preg_match($pattern, $value)) $this->error("Does not match required pattern: $pattern.");
 		return $this;
 
