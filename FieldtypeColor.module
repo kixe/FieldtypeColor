@@ -8,11 +8,12 @@
  * @copyright © 2017 Christoph Thelen
  * @license Licensed under GNU/GPL v3
  * @link https://processwire.com/talk/topic/...
- * @version 1.0.4
+ * @version 1.0.5
  * @since 1.0.1 2017/07/05 - better validation, spectrum options modifiable
  * @since 1.0.2 2017/07/09 - added default value option
  * @since 1.0.3 2017/07/09 - added option for custom javascript
  * @since 1.0.4 2017/08/18 - made # optional for input (pattern attribute)
+ * @since 1.0.5 2017/08/28 - optimized default color handling, added output format option array()
  *
  * made for ProcessWire 2.x, 3.x, Copyright 2016 by Ryan Cramer
  * https://processwire.com
@@ -24,7 +25,7 @@ class FieldtypeColor extends Fieldtype {
 	public static function getModuleInfo() {
 		return array(
 			'title' => 'Color',
-			'version' => 104,
+			'version' => 105,
 			'summary' => 'Field that stores a color value as 32bit integer',
 			'installs' => 'InputfieldColor',
 			'href' => 'https://processwire.com/talk/topic/16679-fieldtypecolor/'
@@ -45,13 +46,13 @@ class FieldtypeColor extends Fieldtype {
 
 	public function getInputfield(Page $page, Field $field) {
 		$inputfield = $this->modules->get('InputfieldColor'); 
-		$inputfield->initValue = $field->defaultValue;
+		$inputfield->initValue = $this->sanitizeValue($page, $field, $field->defaultValue);
 		$inputfield->class = $this->className();
 		return $inputfield; 
 	}
 	
 	public function sanitizeValue(Page $page, Field $field, $value) {
-		if (!$value) return 0;
+		if (!$value) return $value;
 		$value = ltrim($value, '#');
 		if (strlen($value) == 8) return $value;
 		else if (strlen($value) == 6) return 'ff'.$value; // add alpha channel
@@ -64,7 +65,7 @@ class FieldtypeColor extends Fieldtype {
 	}
 
 	public function wakeupValue(Page $page, Field $field, $value) {
-		if (!$value) return null;
+		if (!$value) return $value;
 		$value = str_pad(dechex($value), 8, '0', STR_PAD_LEFT);
 		return $value;
 	}
@@ -114,7 +115,7 @@ class FieldtypeColor extends Fieldtype {
 	 */
 	public function ___formatValue(Page $page, Field $field, $value) {
 		if (!$value) return null;
-		if ($field->outputFormat === 6) return $this->sleepValue($page, $field, $value);
+		if ($field->outputFormat === 7) return $this->sleepValue($page, $field, $value);
 		return $this->formatColorString($value, $field->outputFormat);
 	}
 
@@ -123,8 +124,23 @@ class FieldtypeColor extends Fieldtype {
 		if ($of === 0) return "#".substr($value,2);
 		if ($of === 1) return "#".$value;
 
-		$value = array_map('hexdec', str_split($value, 2));
-		if (in_array($of ,array(3,5))) $opacity = round($value[0] / 255, 2);
+		$hexVals = str_split($value, 2);
+		$value = array_map('hexdec', $hexVals);
+		if (in_array($of ,array(3,5,8))) $opacity = round($value[0] / 255, 2);
+ 
+		if ($of === 8) {
+			$assocArray = array(
+				'o' => $opacity,
+				'r' => $value[1],
+				'g' => $value[2],
+				'b' => $value[3],
+				'ox' => $hexVals[0],
+				'rx' => $hexVals[1],
+				'gx' => $hexVals[2],
+				'bx' => $hexVals[3],
+			);
+			return array_merge($value, $assocArray);
+		}
 
 		if ($of === 2) return "rgb($value[1], $value[2], $value[3])";
 		if ($of === 3) return "rgba($value[1], $value[2], $value[3], $opacity)";	
@@ -148,6 +164,7 @@ class FieldtypeColor extends Fieldtype {
 		$f = $this->wire('modules')->get('InputfieldRadios'); 
 		$f->attr('name', 'outputFormat');
 		$f->label = $this->_('Output Format');
+		$f->description = $this->_('Choose your preferred output format.');
 
 		$f->addOption(0, $this->_('string 6-digit hex color *#4496dd*'));
 		$f->addOption(1, $this->_('string 8-digit hex color *#fa4496dd* (limited browser support)'));
@@ -157,16 +174,28 @@ class FieldtypeColor extends Fieldtype {
 		$f->addOption(5, $this->_('string *hsla(227, 69.2%, 56.7%, 0.98)*'));
 		$f->addOption(6, $this->_('string 8-digit raw hex *fa4496dd*'));
 		$f->addOption(7, $this->_('int 32bit (unformatted)'));
+		$f->addOption(8, $this->_('array(r[0,255], g[0,255], b[0,255], o[0,1], rx[00,ff], gx[00,ff], bx[00,ff], ox[00,ff])'));
+
 		$f->attr('value', (int) $field->outputFormat);
 		$inputfields->add($f); 
 
 		$f = $this->wire('modules')->get('InputfieldColor');
 		$f->attr('name', 'defaultValue');
-		$f->label = $this->_('Default value'); 
-		$f->inputType = 2;
-		$f->description = $this->_('This value is assigned as the default for this field on newly created pages. It does not affect existing pages.');
+		$f->label = $this->_('Default value');
+
+		$f->inputType = $field->inputType;
+		$f->spectrum = $field->spectrum;
+		$f->initJS = $field->initJS;
+		$f->fileJS = $field->fileJS;
+		$f->fileCSS = $field->fileCSS;
+		$f->jqueryCore = $field->jqueryCore;
+		$f->jqueryUI = $field->jqueryUI;
+		$f->alpha = $field->alpha;
+
+		$f->description = $this->_('This value is assigned as the default for blank fields and on newly created pages.');
 		$f->collapsed = Inputfield::collapsedBlank;
-		$f->attr('value', strlen($field->defaultValue) ? substr($field->defaultValue, 1) : null); 
+		$f->attr('value', strlen($field->defaultValue) ? $this->sanitizeValue($this->wire('page'), $field, $field->defaultValue) : null);
+
 		$inputfields->add($f); 
 		
 		return $inputfields; 
