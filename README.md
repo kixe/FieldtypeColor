@@ -29,7 +29,52 @@ Define output format under **Details** - Tab in field settings. Select from the 
 + *string* CSS color value **HSLA**. Example: **'hsla(227, 69.2%, 56.7%, 0.98)'**
 + *string* 32bit raw hex value. Example: **'fa4496dd'**
 + *int 32bit*. Example: **'4198799069'** (unformatted storage value)
-		
++ *array()*
+
+	```
+	array(
+		[0] => 0-255, // opacity
+		[1],['r'] => 0-255,
+		[2],['g'] => 0-255,
+		[3],['b'] => 0-255,
+		['rx'] => 00-ff,
+		['gx'] => 00-ff,
+		['bx'] => 00-ff,
+		['ox'] => 00-ff
+		['o'] => 0-1,
+	)
+	```
+
+
+## Templates & API 
+You can always modify values or output format via ProcessWire API.
+
+**Modify output format**  
+
+```
+$f = $page->fields->get('myColorField');
+$f->outputFormat = 8;
+echo $page->color['rx'];
+```  
+
+**Modify values**
+
++ Remove the page field value by setting empty string or *NULL*.
++ The values (int) 0, (string) '0', '00000000' and '#00000000' are similar and stored as (int) 0 (black, full transparent).
+
+```
+$page->of(false);
+$page->myColorField = 'ff0000'; // red
+$page->save('myColorField');
+```
+
+## Notes
+**Removing the value** is only possible with input field option: Html5 Inputfield of type='color'.
+
+If a **default value** is set, the field is filled with it if the field is empty (for example on newly created pages).
+If Inputfield of type='text' 32bit is selected you can set the value to '#00000000' and the default value will be ignored.
 		
 The Fieldtype includes
 [**Spectrum Color Picker** by Brian Grinstead](https://github.com/bgrins/spectrum)
+
+Any custom Javascript based Inputfield can be used.
