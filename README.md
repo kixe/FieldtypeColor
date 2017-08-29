@@ -31,7 +31,7 @@ Define output format under **Details** - Tab in field settings. Select from the 
 + *int 32bit*. Example: **'4198799069'** (unformatted storage value)
 + *array()*
 
-	```
+```
 	array(
 		[0] => 0-255, // opacity
 		[1],['r'] => 0-255,
@@ -43,7 +43,7 @@ Define output format under **Details** - Tab in field settings. Select from the 
 		['ox'] => 00-ff
 		['o'] => 0-1,
 	)
-	```
+```
 
 
 ## Templates & API 
