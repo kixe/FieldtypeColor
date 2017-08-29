@@ -40,8 +40,8 @@ Define output format under **Details** - Tab in field settings. Select from the 
 		['rx'] => 00-ff,
 		['gx'] => 00-ff,
 		['bx'] => 00-ff,
-		['ox'] => 00-ff
-		['o'] => 0-1,
+		['ox'] => 00-ff, // opacity
+		['o'] => 0-1 // opacity
 	)
 ```
 
