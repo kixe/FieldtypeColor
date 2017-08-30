@@ -71,7 +71,7 @@ $page->save('myColorField');
 ## Notes
 **Deleting values** is only possible with inputfields of type='text' and via API.
 
-If a **default value** is set, the field is filled with it if the field is empty (for example on newly created pages).
+If a **default value** is set, the field is filled with it if the field is empty (for example on newly created pages).  
 If Inputfield of type='text' 32bit is selected you can set the value to '#00000000' and the default value will be ignored.
 		
 The Fieldtype includes
