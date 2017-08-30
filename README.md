@@ -59,7 +59,7 @@ echo $page->color['rx'];
 
 **Modify values**
 
-+ Remove the page field value by setting empty string or *NULL*.
++ Delete the page field value by setting empty string or *NULL*.
 + The values (int) 0, (string) '0', '00000000' and '#00000000' are similar and stored as (int) 0 (black, full transparent).
 
 ```
@@ -69,7 +69,7 @@ $page->save('myColorField');
 ```
 
 ## Notes
-**Removing the value** is only possible with input field option: Html5 Inputfield of type='color'.
+**Deleting values** is only possible with inputfields of type='text' and via API.
 
 If a **default value** is set, the field is filled with it if the field is empty (for example on newly created pages).
 If Inputfield of type='text' 32bit is selected you can set the value to '#00000000' and the default value will be ignored.
