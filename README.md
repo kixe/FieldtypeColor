@@ -27,8 +27,8 @@ Define output format under **Details** - Tab in field settings. Select from the 
 + *string* CSS color value **RGBA**. Example: **'rgba(68, 100, 221, 0.98)'**
 + *string* CSS color value **HSL**. Example: **'hsl(227, 69.2%, 56.7%)'**
 + *string* CSS color value **HSLA**. Example: **'hsla(227, 69.2%, 56.7%, 0.98)'**
-+ *string* 32bit raw hex value. Example: **'fa4496dd'**
-+ *int 32bit*. Example: **'4198799069'** (unformatted storage value)
++ *string* 32bit raw hex value. Example: **'fa4496dd'** (unformatted output value)
++ *int 32bit*. Example: **'4198799069'** (storage value)
 + *array()*
 
 ```

@@ -172,8 +172,8 @@ class FieldtypeColor extends Fieldtype {
 		$f->addOption(3, $this->_('string *rgba(68, 100, 221, 0.98)*'));
 		$f->addOption(4, $this->_('string *hsl(227, 69.2%, 56.7%)*')); 
 		$f->addOption(5, $this->_('string *hsla(227, 69.2%, 56.7%, 0.98)*'));
-		$f->addOption(6, $this->_('string 8-digit raw hex *fa4496dd*'));
-		$f->addOption(7, $this->_('int 32bit (unformatted)'));
+		$f->addOption(6, $this->_('string 8-digit raw hex *fa4496dd* (unformatted)'));
+		$f->addOption(7, $this->_('int 32bit (storage)'));
 		$f->addOption(8, $this->_('array(r[0,255], g[0,255], b[0,255], o[0,1], rx[00,ff], gx[00,ff], bx[00,ff], ox[00,ff])'));
 
 		$f->attr('value', (int) $field->outputFormat);
