@@ -66,6 +66,9 @@ class FieldtypeColor extends Fieldtype {
 
 	public function wakeupValue(Page $page, Field $field, $value) {
 		if (!$value) return $value;
+		//Get the correct number out of the unsigned integer given as string in $value. This has to be done because dechex()
+		//converts its parameter to int which on 32 bit systems cannot store the value of an unsigned 32 bit int.
+		$value = (float)$value;
 		$value = str_pad(dechex($value), 8, '0', STR_PAD_LEFT);
 		return $value;
 	}
