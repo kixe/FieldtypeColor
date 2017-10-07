@@ -14,6 +14,7 @@
  * @since 1.0.3 2017/07/09 - added option for custom javascript
  * @since 1.0.4 2017/08/18 - made # optional for input (pattern attribute)
  * @since 1.0.5 2017/08/28 - optimized default color handling, added output format option array()
+ * @since 1.0.6 2017/10/07 - changed dec to hex conversion in function wakeupValue() from dechex() to base_convert() to be safe on 32bit systems
  *
  * made for ProcessWire 2.x, 3.x, Copyright 2016 by Ryan Cramer
  * https://processwire.com
@@ -25,7 +26,7 @@ class FieldtypeColor extends Fieldtype {
 	public static function getModuleInfo() {
 		return array(
 			'title' => 'Color',
-			'version' => 105,
+			'version' => 106,
 			'summary' => 'Field that stores a color value as 32bit integer',
 			'installs' => 'InputfieldColor',
 			'href' => 'https://processwire.com/talk/topic/16679-fieldtypecolor/'
@@ -66,7 +67,7 @@ class FieldtypeColor extends Fieldtype {
 
 	public function wakeupValue(Page $page, Field $field, $value) {
 		if (!$value) return $value;
-		$value = str_pad(dechex($value), 8, '0', STR_PAD_LEFT);
+		$value = str_pad(base_convert("$value", 10, 16), 8, '0', STR_PAD_LEFT);
 		return $value;
 	}
 
