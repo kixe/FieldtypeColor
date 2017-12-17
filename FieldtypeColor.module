@@ -28,7 +28,7 @@ class FieldtypeColor extends Fieldtype {
 		return array(
 			'title' => 'Color',
 			'version' => 107,
-			'summary' => 'Field that stores a color value as 32bit integer',
+			'summary' => 'Field that stores a color value as 32bit integer reflecting a RGBA value. Many options for Input (HTML5 Inputfield Color, Textfield with changing background, various jQuery/JS ColorPickers, custom jQuery/JS/CSS) and Output (RGB, RGBA, HSL, HSLA, HEX, Array).',
 			'installs' => 'InputfieldColor',
 			'href' => 'https://processwire.com/talk/topic/16679-fieldtypecolor/'
 			);
