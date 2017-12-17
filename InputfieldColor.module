@@ -13,7 +13,9 @@
  * @since 1.0.3 2017/07/09 - added option for custom javascript
  * @since 1.0.4 2017/08/18 - made # optional for input (pattern attribute)
  * @since 1.0.5 2017/08/28 - optimized default color handling, added output format option array()
- * 
+ * @since 1.0.6 2017/12/17 - modified render() for usage in modules config
+ * @since 1.0.7 2017/12/17 - sync version number to fieldtype
+ *
  * made for ProcessWire 2.x, 3.x, Copyright 2016 by Ryan Cramer
  * https://processwire.com
  * @todo
@@ -27,7 +29,7 @@ class InputfieldColor extends Inputfield {
 		return array(
 			'title' => __('Color', __FILE__), // Module Title
 			'summary' => __('Inputfield for colors', __FILE__), // Module Summary
-			'version' => 105,
+			'version' => 107,
 			'href' => 'https://processwire.com/talk/topic/16679-fieldtypecolor/'
 			);
 	}
@@ -91,6 +93,7 @@ class InputfieldColor extends Inputfield {
 		if (!$this->value) $this->value = null;
 
 		if ($this->value) {
+			$this->value = str_pad(ltrim($this->value, '#'),8,'f',STR_PAD_LEFT);
 			$color32 = "#".$this->value;
 			$color24 = $bgColor = "#".substr($this->value,2,6);		
 			$value = array_map('hexdec', str_split($this->value, 2));
