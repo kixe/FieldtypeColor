@@ -7,7 +7,7 @@
  * @copyright © 2017 Christoph Thelen
  * @license Licensed under GNU/GPL v3
  * @link https://processwire.com/talk/topic/...
- * @version 1.0.5
+ * @version 1.0.8
  * @since 1.0.1 2017/07/05 - better validation, spectrum options modifiable
  * @since 1.0.2 2017/07/09 - added default value option
  * @since 1.0.3 2017/07/09 - added option for custom javascript
@@ -15,6 +15,7 @@
  * @since 1.0.5 2017/08/28 - optimized default color handling, added output format option array()
  * @since 1.0.6 2017/12/17 - modified render() for usage in modules config
  * @since 1.0.7 2017/12/17 - sync version number to fieldtype
+ * @since 1.0.8 2018/08/31 - added functions getTextColor() convertColorName()
  *
  * made for ProcessWire 2.x, 3.x, Copyright 2016 by Ryan Cramer
  * https://processwire.com
@@ -29,7 +30,7 @@ class InputfieldColor extends Inputfield {
 		return array(
 			'title' => __('Color', __FILE__), // Module Title
 			'summary' => __('Inputfield for colors', __FILE__), // Module Summary
-			'version' => 107,
+			'version' => 108,
 			'href' => 'https://processwire.com/talk/topic/16679-fieldtypecolor/'
 			);
 	}
@@ -88,6 +89,68 @@ class InputfieldColor extends Inputfield {
 		parent::renderReady($parent, $renderValueMode); 
 	}
 
+	/**
+	 * get textcolor (light or dark) corresponding to the background for better contrast
+	 * 
+	 * @param int/string $bgColor expecting string or int with 6 (24bit) or 8 (32bit) digits with or without leading '#'
+	 * @param int/string $textColorLight default: '#fff' (white)
+	 * @param int/string $textColorDark	default: '#000' (black)
+	 * @return string $color light or dark
+	 *
+	 */
+	public function getTextColor($bgColor, $textColorLight = '#fff', $textColorDark = '#000') {
+		if (!is_string($bgColor)) return $textColorDark;
+		else if (!ctype_xdigit(ltrim($bgColor, '#'))) {
+			$bgColor = $this->convertColorName($bgColor);
+			if (false === $bgColor) return $textColorDark;
+		}
+		$bgColor = ltrim($bgColor, '#');
+		$bgColor = str_pad($bgColor,8,'f',STR_PAD_LEFT);
+		$ARGB = array_map('hexdec', str_split($bgColor, 2));
+		$opacity = round($ARGB[0] / 255, 2);
+		if ($opacity < 0.45) return $textColorDark;
+		return ($ARGB[1]+6*$ARGB[2]+$ARGB[3])*3/8 > 460?  $textColorDark : $textColorLight;
+	}
+
+	/**
+	 * convert color name (hex -> html, html -> hex)
+	 * 
+	 * @param $color
+	 * @param $to convert to 'hex' or 'html'
+	 * @return bool/ string
+	 *
+	 */
+	public function convertColorName($color, $to = 'hex') {
+		$colorArray = $this->getX11ColorArray();
+		if ($to = 'hex') {
+			$key = array_search($color, array_column($colorArray, 0));
+			return empty($colorArray[$key][1])? false : $colorArray[$key][1];
+		}
+		else if ($to = 'html') {
+			$key = array_search($color, array_column($colorArray, 1));
+			return empty($colorArray[$key][0])? false : $colorArray[$key][0];
+		}
+		return false;
+	}
+
+	/**
+	 * get multiple array with html color names and corresponding hex codes and rgb values
+	 * 
+	 * @param $domain
+	 * @param $path file path
+	 * @return boolean
+	 *
+	 */
+	protected function getX11ColorArray() {
+		$path = __DIR__ .'/x11color.txt';
+		if (!file_exists($path)) throw new WireException("Missing file " . $path);
+		$array = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+		if ($array === false) throw new WireException("Failed to open file: $path");
+		return array_map(function($e) {
+			return explode("\t", $e);
+		}, $array);
+	}
+
 	public function ___render() {
 		if ($this->value === "" && strlen($this->initValue)) $this->value = $this->initValue;
 		if (!$this->value) $this->value = null;
@@ -104,7 +167,8 @@ class InputfieldColor extends Inputfield {
 		}
 
 		$opacity = round($value[0] / 255, 2);
-		$textColor = ($value[1]+6*$value[2]+$value[3])*3/8 > 460? '#000':'#fff';
+		// $textColor = ($value[1]+6*$value[2]+$value[3])*3/8 > 460? '#000':'#fff';
+		$textColor = $this->getTextColor($this->value);
 		$rgba = "rgba($value[1], $value[2], $value[3], $opacity)";
 		$this->attr('value', $color24);
 
@@ -117,7 +181,7 @@ class InputfieldColor extends Inputfield {
 				break;
 			case 2:
 				$this->alpha = 1;
-				if ($opacity < 0.45) $textColor = '#000';
+				// if ($opacity < 0.45) $textColor = '#000';
 				$this->attr('value', $color32);
 				$this->attr('style', "color: $textColor; background: $bgColor; background-image: linear-gradient($rgba, $rgba), url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAIAAADZF8uwAAAAGUlEQVQYV2M4gwH+YwCGIasIUwhT25BVBADtzYNYrHvv4gAAAABJRU5ErkJggg==');");
 				$this->attr('placeholder', '#ff000000');
