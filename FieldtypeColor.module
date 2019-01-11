@@ -17,6 +17,7 @@
  * @since 1.0.6 2017/10/07 - changed dec to hex conversion in function wakeupValue() from dechex() to base_convert() to be safe on 32bit systems
  * @since 1.0.7 2017/10/08 - changed dec to hex conversion in function wakeupValue() from dechex() to custom function to be safe on 32bit systems
  * @since 1.0.8 2018/09/08 - Installation error if PHP is running on 32-bit system and BCMath extension is not installed
+ * @since 1.0.9 2019/01/12 - fixed number format bug for rgba() and hsla() alpha channel if comma is forced as decimal separator by locale settings
  *
  * made for ProcessWire 2.x, 3.x, Copyright 2016 by Ryan Cramer
  * https://processwire.com
@@ -28,7 +29,7 @@ class FieldtypeColor extends Fieldtype {
 	public static function getModuleInfo() {
 		return array(
 			'title' => 'Color',
-			'version' => 108,
+			'version' => 109,
 			'summary' => 'Field that stores a color value as 32bit integer reflecting a RGBA value. Many options for Input (HTML5 Inputfield Color, Textfield with changing background, various jQuery/JS ColorPickers, custom jQuery/JS/CSS) and Output (RGB, RGBA, HSL, HSLA, HEX, Array).',
 			'installs' => 'InputfieldColor',
 			'href' => 'https://processwire.com/talk/topic/16679-fieldtypecolor/'
@@ -90,7 +91,7 @@ class FieldtypeColor extends Fieldtype {
     }
 
 	/**
-	 * Converts an RGB color value to HSL. Conversion formula
+	 * Converts a RGB color value to HSL. Conversion formula
 	 * @param array of 3 color values R, G, and B [0, 255]
 	 * @return array The HSL representation
 	 *
@@ -145,7 +146,12 @@ class FieldtypeColor extends Fieldtype {
 
 		$hexVals = str_split($value, 2);
 		$value = array_map('hexdec', $hexVals);
-		if (in_array($of ,array(3,5,8))) $opacity = round($value[0] / 255, 2);
+
+		// opacity
+		if (in_array($of ,array(3,5,8))) {
+			$opacity = round($value[0] / 255, 2); // float
+			$opacity = rtrim(number_format( $opacity, 2, '.', '' ),'0'); // convert float to string with dot as decimal separator
+		}
  
 		if ($of === 8) {
 			$assocArray = array(
