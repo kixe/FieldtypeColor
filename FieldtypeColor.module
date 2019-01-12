@@ -150,7 +150,7 @@ class FieldtypeColor extends Fieldtype {
 		// opacity
 		if (in_array($of ,array(3,5,8))) {
 			$opacity = round($value[0] / 255, 2); // float
-			$opacity = rtrim(number_format( $opacity, 2, '.', '' ),'0'); // convert float to string with dot as decimal separator
+			$opacity = rtrim(number_format($opacity, 2, '.', ''),'.0'); // convert float to string with dot as decimal separator
 		}
  
 		if ($of === 8) {

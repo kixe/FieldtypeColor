@@ -168,8 +168,8 @@ class InputfieldColor extends Inputfield {
 		}
 
 		$opacity = round($value[0] / 255, 2);
-		$opacity = rtrim(number_format( $opacity, 2, '.', '' ),'0');
-		
+		$opacity = rtrim(number_format($opacity, 2, '.', ''),'.0');
+
 		$textColor = $this->getTextColor($this->value);
 		$rgba = "rgba($value[1], $value[2], $value[3], $opacity)";
 		$this->attr('value', $color24);
