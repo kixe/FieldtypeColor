@@ -166,11 +166,13 @@ class InputfieldColor extends Inputfield {
 			$bgColor = '#fff';
 		}
 
-		$opacity = round($value[0] / 255, 2);
-		// $textColor = ($value[1]+6*$value[2]+$value[3])*3/8 > 460? '#000':'#fff';
+		$opacity = round($value[0] / 255, 2); // float
+		$opacity = rtrim(number_format( $opacity, 2, '.', '' ),'0'); // convert float to string with dot as decimal separator
+
 		$textColor = $this->getTextColor($this->value);
 		$rgba = "rgba($value[1], $value[2], $value[3], $opacity)";
 		$this->attr('value', $color24);
+		$this->attr('data-input-type', $this->inputType);
 
 		switch ($this->inputType) {	
 			case 0:		
