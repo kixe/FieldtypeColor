@@ -167,9 +167,9 @@ class InputfieldColor extends Inputfield {
 			$bgColor = '#fff';
 		}
 
-		$opacity = round($value[0] / 255, 2); // float
-		$opacity = rtrim(number_format( $opacity, 2, '.', '' ),'0'); // convert float to string with dot as decimal separator
-
+		$opacity = round($value[0] / 255, 2);
+		$opacity = rtrim(number_format( $opacity, 2, '.', '' ),'0');
+		
 		$textColor = $this->getTextColor($this->value);
 		$rgba = "rgba($value[1], $value[2], $value[3], $opacity)";
 		$this->attr('value', $color24);
@@ -184,7 +184,6 @@ class InputfieldColor extends Inputfield {
 				break;
 			case 2:
 				$this->alpha = 1;
-				// if ($opacity < 0.45) $textColor = '#000';
 				$this->attr('value', $color32);
 				$this->attr('style', "color: $textColor; background: $bgColor; background-image: linear-gradient($rgba, $rgba), url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAIAAADZF8uwAAAAGUlEQVQYV2M4gwH+YwCGIasIUwhT25BVBADtzYNYrHvv4gAAAABJRU5ErkJggg==');");
 				$this->attr('placeholder', '#ff000000');
