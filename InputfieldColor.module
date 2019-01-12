@@ -16,6 +16,7 @@
  * @since 1.0.6 2017/12/17 - modified render() for usage in modules config
  * @since 1.0.7 2017/12/17 - sync version number to fieldtype
  * @since 1.0.8 2018/08/31 - added functions getTextColor() convertColorName()
+ * @since 1.0.9 2019/01/12 - fixed number format bug for rgba() and hsla() alpha channel if comma is forced as decimal separator by locale settings, added data-input-type attribute for better JS handling
  *
  * made for ProcessWire 2.x, 3.x, Copyright 2016 by Ryan Cramer
  * https://processwire.com
@@ -30,7 +31,7 @@ class InputfieldColor extends Inputfield {
 		return array(
 			'title' => __('Color', __FILE__), // Module Title
 			'summary' => __('Inputfield for colors', __FILE__), // Module Summary
-			'version' => 108,
+			'version' => 109,
 			'href' => 'https://processwire.com/talk/topic/16679-fieldtypecolor/'
 			);
 	}
