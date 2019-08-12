@@ -29,7 +29,7 @@ class FieldtypeColor extends Fieldtype {
 	public static function getModuleInfo() {
 		return array(
 			'title' => 'Color',
-			'version' => 109,
+			'version' => 110,
 			'summary' => 'Field that stores a color value as 32bit integer reflecting a RGBA value. Many options for Input (HTML5 Inputfield Color, Textfield with changing background, various jQuery/JS ColorPickers, custom jQuery/JS/CSS) and Output (RGB, RGBA, HSL, HSLA, HEX, Array).',
 			'installs' => 'InputfieldColor',
 			'href' => 'https://processwire.com/talk/topic/16679-fieldtypecolor/'
@@ -139,7 +139,22 @@ class FieldtypeColor extends Fieldtype {
 		return $this->formatColorString($value, $field->outputFormat);
 	}
 
+	/**
+	 * Format color string
+	 *
+	 * @param $value string - hex string of 8 chiffres, first 2 is the alpha channel
+	 * @param int output format
+	 * @return string (formatted color string
+	 * @throws object WireException - if input doesn't match (check for length, detailed check in debug mode)
+	 *
+	 */
 	public function formatColorString($value, $of = 0) {
+
+		// simple length check or preg_match in debug mode
+		if (strlen($value) != 8 || ($this->wire('config')->debug && !preg_match('/[A-Fa-f0-9]{8}/', $value))) {
+			throw new WireException("Invalid input: $value. Expected hex string of 8 digits length.");
+		}
+
 		if ($of === 6) return $value;
 		if ($of === 0) return "#".substr($value,2);
 		if ($of === 1) return "#".$value;
