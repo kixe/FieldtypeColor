@@ -165,12 +165,11 @@ class FieldtypeColor extends Fieldtype {
 		$value = array_map('hexdec', $hexVals);
 
 		// opacity
-		$opacity = '1';
+		$opacity = '0';
 		if ($value[0] > 1 && in_array($of ,array(3,5,8))) {
 			$opacity = round($value[0] / 255, 2); // float
 			$opacity = rtrim(number_format($opacity, 2, '.', ''),'.0'); // convert float to string with dot as decimal separator
 		}
-		$opacity = '1';
  
 		if ($of === 8) {
 			$assocArray = array(
