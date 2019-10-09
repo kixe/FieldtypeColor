@@ -7,7 +7,7 @@
  * @copyright © 2017 Christoph Thelen
  * @license Licensed under GNU/GPL v3
  * @link https://processwire.com/talk/topic/...
- * @version 1.1.2
+ * @version 1.1.3
  * @since 1.0.1 2017/07/05 - better validation, spectrum options modifiable
  * @since 1.0.2 2017/07/09 - added default value option
  * @since 1.0.3 2017/07/09 - added option for custom javascript
@@ -20,6 +20,7 @@
  * @since 1.1.0 2019/08/12 - better input check formatColorString()
  * @since 1.1.1 2019/09/01 - fixed bug missing opacity if 0
  * @since 1.1.2 2019/09/04 - fixed bug #5 FieldtypeColor index typo in var in function RGB2HSL() thanks to @junoforno
+ * @since 1.1.3 2019/10/10 - fixed bug #1 InputfieldColor - remove pattern attribute if spectrum color picker is used to prevent error in Chrome
  *
  * made for ProcessWire 2.x, 3.x, Copyright 2016 by Ryan Cramer
  * https://processwire.com
@@ -34,7 +35,7 @@ class InputfieldColor extends Inputfield {
 		return array(
 			'title' => __('Color', __FILE__), // Module Title
 			'summary' => __('Inputfield for colors', __FILE__), // Module Summary
-			'version' => 112,
+			'version' => 113,
 			'href' => 'https://processwire.com/talk/topic/16679-fieldtypecolor/'
 			);
 	}
@@ -197,12 +198,11 @@ class InputfieldColor extends Inputfield {
 				if (!$color32) $color32 = '#00000000';
 				$this->attr('value', $color32);
 				$this->attr('placeholder', '#ff000000');
-				$this->attr('pattern', '(#?[a-fA-F\d]{8})?');
+				$this->removeAttr('pattern');
 				break;
 			case 4:
 				if ($this->alpha) $this->attr('value', $color32);
-				else $this->attr('value', $color24);
-				break;			
+				else $this->attr('value', $color24);		
 		}
 
 		$attrs = $this->getAttributes();
