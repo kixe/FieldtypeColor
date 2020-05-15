@@ -1,0 +1,9 @@
+input.FieldtypeOptionsColor + span.pw-no-select {
+	display: inline-block;
+	min-width: 9em;
+	padding: 0.2em;
+	margin-bottom: 0.2em;
+	text-align: left;
+}
+
+

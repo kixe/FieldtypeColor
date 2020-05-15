@@ -1,0 +1,195 @@
+<?php namespace ProcessWire;
+
+/**
+ * ProcessWire Fieldtype Color Options
+ *
+ * @author Christoph Thelen aka @kixe 2020/01/14
+ * @copyright © 2020 Christoph Thelen
+ * @license Licensed under GNU/GPL v3
+ * @link https://processwire.com/talk/topic/...
+ * @version 1.0.0
+ *
+ * @since 1.0.0 2020/05/14 - init
+ *
+ * made for ProcessWire 3.x, by Ryan Cramer
+ * https://processwire.com
+ * 
+ */
+
+class FieldtypeOptionsColor extends FieldtypeOptions implements Module {
+
+	public $colorNames;
+	private $fieldtypeColor;
+
+	public static function getModuleInfo() {
+		return array(
+			'title' => __('Select Color Options', __FILE__),
+			'summary' => __('Field that stores colors as single and multi select options.', __FILE__),
+			'version' => 100,
+			// requirement prevents unintended deletion of db table fieldtype_options
+			'requires' => array('FieldtypeOptions'),
+			'installs' => array('FieldtypeOptions')
+		);
+	}
+
+	/**
+	 * Construct
+	 * 
+	 */
+	public function __construct() {
+		$path = dirname(__FILE__) . '/'; 
+		require_once($path . 'FieldtypeColor.module');
+		parent::__construct();
+	}
+
+	public function init() {
+		$this->fieldtypeColor = new FieldtypeColor();
+		$this->colorNames = json_decode(file_get_contents( __DIR__ . '/colornames.json'), true);
+		$url = $this->config->urls->get($this->className());
+		$this->wire('config')->scripts->add($url . 'FieldtypeOptionsColor.js');
+		$this->wire('config')->styles->add($url . 'FieldtypeOptionsColor.css');
+	}
+
+	/**
+	 * create array of data attributes based on options value where .js pulls colors from
+	 * 
+	 * @param object $options SelectableOption 
+	 * @return array of data attributes
+	 * 
+	 */
+	protected function getOptionsAttributesArray($option) {
+		$value = $option->value? $option->value : $option->title;
+		$value = $this->getHexCode($value);
+		$bgColor = "#" . substr($value,2,6);
+		$value = array_map('hexdec', str_split($value, 2));
+		$opacity = round($value[0] / 255, 2);
+		$textColor = ($value[1]+6*$value[2]+$value[3])*3/8 > 460? '#000':'#fff';
+		$rgba = "rgba($value[1], $value[2], $value[3], $opacity)";
+		return array('data-background' => $bgColor, 'data-color' => $textColor, 'data-rgba' => $rgba);
+	}
+
+	protected function getHexCode($value) {
+		// remove #
+		$value = ltrim($value,'#');
+		// get hexcode by name
+		if (!ctype_xdigit($value)) $value = $this->getColorByName($value);
+		// add alpha channel
+		return str_pad($value,8,'f',STR_PAD_LEFT);
+	}
+
+	/**
+	 * translate Color name to hex
+	 * 
+	 * @param string $name (e.g. darkolivegreen, DarkOliveGreen OR Dark Olive Green)
+	 * @return string hexadecimal number
+	 * 
+	 */
+	protected function getColorByName($name, $default = 'ffffff') {
+		$name = strtolower(wire('sanitizer')->removeWhitespace($name));
+		$colors = array_change_key_case($this->colorNames);
+		if (array_key_exists($name, $colors)) return $colors[$name];
+		return $default; // default white
+	}
+
+	/**
+	 * Get the Inputfield that provides input for this Fieldtype
+	 * 
+	 * @param Page $page
+	 * @param Field $field
+	 * @return Inputfield
+	 * 
+	 */
+	public function getInputfield(Page $page, Field $field) {
+
+		$inputfieldClass = $field->get('inputfieldClass'); 
+		if(!$inputfieldClass) $inputfieldClass = 'InputfieldSelect';
+		$inputfield = $this->wire('modules')->get($inputfieldClass);
+		if(!$inputfield) $inputfield = $this->wire('modules')->get('InputfieldSelect'); 
+		$inputfield->class = $this->className();
+
+		foreach($this->manager->getOptions($field) as $option) {
+			$oaa = $this->getOptionsAttributesArray($option);
+			$title = in_array($option->getTitle(), array('null','0'))? '&nbsp;' : $option->getTitle();
+			$inputfield->addOption((int) $option->id, $title, $oaa? $oaa : null); 
+		}
+	
+		if($field->initValue) {
+			$value = $page->getUnformatted($field->name); 
+			if($field->required && !$field->requiredIf) {
+				if(empty($value) || !count($value)) {
+					$page->set($field->name, $field->initValue);
+				}
+			} else if($this->wire('process') != 'ProcessField' && !count($value)) {
+				$this->warning(
+					$field->getLabel() . " ($field->name): " . 
+					$this->_('Configured pre-selection not populated since value is not always required. Please correct this field configuration.') 
+				);
+			}
+		}
+	
+		return $inputfield;
+	}
+
+	public function ___getConfigInputfields(Field $field) {
+
+		$configInputfields = parent::___getConfigInputfields($field);
+
+		$inputfieldClass = $configInputfields->get('inputfieldClass');
+		$inputfieldClass->removeOption('InputfieldAsmSelect');
+		$inputfieldClass->description = $this->_('Depending on what input type you choose, the user will be able to select either a single option or multiple options. The color you specified is displayed as the background color of the label or inputfield itself.');
+
+		$initValue = $configInputfields->get('initValue');
+		if ($initValue) {
+			$initValue->class = $this->className();
+			foreach($this->manager->getOptions($field) as $option) {
+				$title = in_array($option->getTitle(), array('null','0'))? '&nbsp;' : $option->getTitle();
+				$initValue->replaceOption($option->id, $option->id, $title, $this->getOptionsAttributesArray($option));
+			}
+		}
+
+		$configOptions = $configInputfields->get('_options');
+		$configOptions->description .= "\n" . $this->_("The related color is pulled from the title or value, if specified. You can use 6 or 8 digit hex codes with or without leading # or named colors (HTML). The field recognizes different spellings for named colors (e.g. Darkolivegreen, DarkOliveGreen or Dark Olive Green). Use '0' or 'null' as title if you want to hide the title and show only the color as label. Include alpha channel via the two leading digits in a hex code of 8 character length.");
+
+		$outputFormat = $this->fieldtypeColor->getConfigInputfields($field)->get('outputFormat');
+		$outputFormat->removeOption(7);
+		// $outputFormat->label = $this->_('Additional output formats');
+		$outputFormat->description = $this->_('Choose your preferred output format for frontend, which is always be provided via the `value` property');
+
+		$configInputfields->append($outputFormat);
+
+		return $configInputfields;
+
+	}
+
+	/**
+	 * Prep a value for front-end output
+	 * 
+	 * Format the 'value' property of the SelectableOptionArray
+	 * 
+	 * @param Page $page
+	 * @param Field $field
+	 * @param SelectableOptionArray $value
+	 * @return SelectableOptionArray
+	 * 
+	 */
+	public function ___formatValue(Page $page, Field $field, $value) {
+		$soa = parent::___formatValue($page, $field, $value);
+		foreach ($soa as &$so) {
+			$color= $so->value? $so->value : $so->title;
+			$color = $this->getHexCode($color);
+			$so->value = $this->fieldtypeColor->formatColorString($color, $field->outputFormat);
+		}
+		return $soa;
+	}
+
+	/**
+	 * Although FieldtypeOptions is required,
+	 * we double-check that FieldtypeOptions is installed
+	 * to prevent removal of fieldtype_options table
+	 * 
+	 */
+	public function ___uninstall() {
+		if (wire('modules')->isInstalled('FieldtypeOptions')) return;
+		parent::___uninstall();
+	}
+}
