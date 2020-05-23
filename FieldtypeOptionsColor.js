@@ -40,7 +40,6 @@ $(document).ready(function() {
 	/* multi select */
 	$("select.FieldtypeOptionsColor[multiple]").each(function() {
 		var selected = $(this).find(":selected");
-		selected.append(" ✓");	
 		var size = $(this).children().length;
 		$(this).attr('size', size);
 	});

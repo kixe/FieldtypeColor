@@ -6,4 +6,11 @@ input.FieldtypeOptionsColor + span.pw-no-select {
 	text-align: left;
 }
 
+select.FieldtypeOptionsColor[multiple] {
+	min-width: 12em;
+}
+
+select.FieldtypeOptionsColor[multiple] option:checked:after {
+	content: ' ✓';
+}
 

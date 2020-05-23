@@ -10,6 +10,7 @@
  * @version 1.0.0
  *
  * @since 1.0.0 2020/05/14 - init
+ * @since 1.0.1 2020/05/23 - mark selected items in select multiple via css rather than js
  *
  * made for ProcessWire 3.x, by Ryan Cramer
  * https://processwire.com
@@ -25,7 +26,7 @@ class FieldtypeOptionsColor extends FieldtypeOptions implements Module {
 		return array(
 			'title' => __('Select Color Options', __FILE__),
 			'summary' => __('Field that stores colors as single and multi select options.', __FILE__),
-			'version' => 100,
+			'version' => 101,
 			// requirement prevents unintended deletion of db table fieldtype_options
 			'requires' => array('FieldtypeOptions'),
 			'installs' => array('FieldtypeOptions')
