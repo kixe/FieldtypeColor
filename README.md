@@ -3,7 +3,7 @@ FieldtypeColor
 
 ## Fieldtype/Inputfield for ProcessWire 3.0
 
-Field that stores a color value as 32bit integer reflecting a RGBA value. Many options for Input (HTML5 Inputfield Color, Textfield with changing background, various jQuery/JS ColorPickers, custom jQuery/JS/CSS) and Output (RGB, RGBA, HSL, HSLA, HEX, Array).
+Field that stores colors. Many options for Input (HTML5 Inputfield Color, Textfield with changing background, various jQuery/JS ColorPickers, custom jQuery/JS/CSS) and Output (RGB, RGBA, HSL, HSLA, HEX). Package includes Fieldtype Color Select.
 
 ## Inputfield  
 Select between **5 types of Inputfields** 
@@ -78,6 +78,8 @@ The Fieldtype includes
 [**Spectrum Color Picker** by Brian Grinstead](https://github.com/bgrins/spectrum)
 
 Any custom Javascript based Inputfield can be used.
+
+---
 
 Fieldtype Select Color Options
 ==============================
