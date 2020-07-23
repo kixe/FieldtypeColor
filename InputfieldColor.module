@@ -219,7 +219,11 @@ class InputfieldColor extends Inputfield {
 				    $options
 				    color: \"$value\",
 				    change: function(color) {
-				    	this.value = color.toHex8String(); 
+				    	if(color === null){
+					    this.value = 0;
+					}else{
+					    this.value = color.toHex8String(); 
+					}
 				    }
 				});
 			</script>
