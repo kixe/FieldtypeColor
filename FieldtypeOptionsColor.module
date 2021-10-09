@@ -184,13 +184,56 @@ class FieldtypeOptionsColor extends FieldtypeOptions implements Module {
 	}
 
 	/**
+	 * we need to modify table structure
+	 * to allow title duplicates (0 or null)
+	 * 
+	 */
+	public function ___install() {
+		parent::___install();
+		$database = $this->wire('database');
+		$maxLen = $database->getMaxIndexLength();
+		$charset = $this->wire('config')->dbCharset;
+		if(strtolower($charset) == 'utf8mb4') $maxLen -= 20;
+		$sql =
+				"ALTER TABLE " . SelectableOptionManager::optionsTable . 
+				" ADD UNIQUE `title` (`title`($maxLen), `fields_id`, `option_id`), " .
+				"DROP INDEX `title`;";
+		$database->exec($sql);
+	}
+
+	/**
 	 * Although FieldtypeOptions is required,
 	 * we double-check that FieldtypeOptions is installed
 	 * to prevent removal of fieldtype_options table
+	 *
+	 * we remove any orphaned entries in the db table
+	 * to remove securly '0' and 'null' titles
+	 * and reset the table to FieldtypeOptions default state if necessary
 	 * 
 	 */
 	public function ___uninstall() {
-		if (wire('modules')->isInstalled('FieldtypeOptions')) return;
+		if (wire('modules')->isInstalled('FieldtypeOptions')) {
+			// is there any field of type FieldtypeOptions?	
+			// $fields = $this->wire('fields')->find('type=FieldtypeOptions')->each('id');
+
+			// get IDs of all active fields
+			$fields = $this->wire('fields')->getAll()->each('id');
+
+			$not = implode(',', $fields);
+			
+			$database = $this->wire('database');
+			$maxLen = $database->getMaxIndexLength();
+			$charset = $this->wire('config')->dbCharset;
+			if(strtolower($charset) == 'utf8mb4') $maxLen -= 20;
+			$sql =
+				"DELETE FROM " . SelectableOptionManager::optionsTable .
+				" WHERE `fields_id` NOT IN ($not);" .
+				"ALTER TABLE " . SelectableOptionManager::optionsTable . 
+				" ADD UNIQUE `title` (`title`($maxLen), `fields_id`), " .
+				"DROP INDEX `title`;";
+			$database->exec($sql);
+			return;
+		}
 		parent::___uninstall();
 	}
 }

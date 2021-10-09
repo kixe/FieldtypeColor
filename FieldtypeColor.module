@@ -8,7 +8,7 @@
  * @copyright © 2017 Christoph Thelen
  * @license Licensed under GNU/GPL v3
  * @link https://processwire.com/talk/topic/...
- * @version 1.1.5
+ * @version 1.1.6
  *
  * @since 1.0.1 2017/07/05 - better validation, spectrum options modifiable
  * @since 1.0.2 2017/07/09 - added default value option
@@ -25,6 +25,7 @@
  * @since 1.1.3 2019/10/10 - fixed bug #1 InputfieldColor - remove pattern attribute if spectrum color picker is used to prevent error in Chrome
  * @since 1.1.4 2020/03/21 - fixed number format bug for hsl() output: use dot instead of comma as decimal separator independent from language setup
  * @since 1.1.5 2020/05/15 switched to PrpcessWirte namespace
+ * @since 1.1.6 2021/10/04 added comparison functions getClosestColorName(), getColorDistance(), getLuminanceDistance()
  *
  * made for ProcessWire 3.x by Ryan Cramer
  * https://processwire.com
@@ -36,7 +37,7 @@ class FieldtypeColor extends Fieldtype {
 	public static function getModuleInfo() {
 		return array(
 			'title' => 'Color',
-			'version' => 115,
+			'version' => 116,
 			'summary' => 'Field that stores a color value as 32bit integer reflecting a RGBA value. Many options for Input (HTML5 Inputfield Color, Textfield with changing background, various jQuery/JS ColorPickers, custom jQuery/JS/CSS) and Output (RGB, RGBA, HSL, HSLA, HEX, Array).',
 			'installs' => 'InputfieldColor',
 			'href' => 'https://processwire.com/talk/topic/16679-fieldtypecolor/'
@@ -138,6 +139,64 @@ class FieldtypeColor extends Fieldtype {
 	}
 
 	/**
+	 * Find the "naive" difference between two colors.
+	 * @see https://php.tutorialink.com/finding-nearest-match-rgb-color-from-array-of-colors/
+	 * @param int[] $color_a Three-element array with R,G,B color values 0-255.
+	 * @param int[] $color_b Three-element array with R,G,B color values 0-255.
+	 * @return int
+	 */
+	public function getColorDistance(array $color_a, array $color_b): int {
+	    return
+	        abs($color_a[0] - $color_b[0]) +
+	        abs($color_a[1] - $color_b[1]) +
+	        abs($color_a[2] - $color_b[2]);
+	}
+
+	/**
+	 * Find the difference between two colors' luminance values.
+	 * @see https://php.tutorialink.com/finding-nearest-match-rgb-color-from-array-of-colors/
+	 * @param int[] $color_a Three-element array with R,G,B color values 0-255.
+	 * @param int[] $color_b Three-element array with R,G,B color values 0-255.
+	 * @return int
+	 */
+	public function getLuminanceDistance(array $color_a, array $color_b): int {
+	    $luminance_f = function ($red, $green, $blue): int {
+	        // Source: https://en.wikipedia.org/wiki/Relative_luminance
+	        $luminance = (int) (0.2126 * $red + 0.7152 * $green + 0.0722 * $blue);
+	        return $luminance;
+	    };
+
+	    return abs(
+	        $luminance_f($color_a[0], $color_a[1], $color_a[2]) -
+	        $luminance_f($color_b[0], $color_b[1], $color_b[2])
+	    );
+	}
+
+	/**
+	 * Find the closest named color
+	 * @param hexcolor
+	 * @return string
+	 */
+	public function getClosestColorName(string $color) {
+		$color = ltrim($color, '#');
+		if (strlen($color) == 6) $color = "ff$color";
+		if (strlen($color) != 8) throw new WireException("Invalid parameter. Expected hex string of 6 or 8 digits length with or without leading '#'.");
+		$color = $this->formatColorString($color, 9);	
+		$palette = json_decode(file_get_contents(__DIR__ . '/colornames.json'), true);
+		$min = 765;
+		$match = null;
+		foreach ($palette as $name => $pcolor) {
+			$pcolor = $this->formatColorString("ff$pcolor", 9);
+			if ($pcolor === $color) return $name; // quick exit if full match
+		    $distance = $this->getColorDistance($pcolor, $color);
+		    if ($distance >= $min) continue;
+		    $min = $distance;
+		    $match = $name;
+		}
+		return $match;
+	}
+
+	/**
 	 * Format value for output
 	 *
 	 */
@@ -177,6 +236,8 @@ class FieldtypeColor extends Fieldtype {
 			$opacity = rtrim(number_format($opacity, 2, '.', ''),'.0'); // convert float to string with dot as decimal separator
 		}
  
+ 		if ($of === 9) return [$value[1], $value[2], $value[3]];
+
 		if ($of === 8) {
 			$assocArray = array(
 				'o' => $opacity,
