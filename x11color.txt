@@ -140,3 +140,4 @@ lightslategray	#778899	119,136,153
 slategray	#708090	112,128,144
 darkslategray	#2F4F4F	47,79,79
 black	#000000	0,0,0
+rebeccapurple	#663399	102,51,153
