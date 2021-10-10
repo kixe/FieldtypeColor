@@ -23,7 +23,8 @@
  * @since 1.1.2 2019/09/04 - fixed bug #5 FieldtypeColor index typo in var in function RGB2HSL() thanks to @junoforno
  * @since 1.1.3 2019/10/10 - fixed bug #1 InputfieldColor - remove pattern attribute if spectrum color picker is used to prevent error in Chrome
  * @since 1.1.4 2020/05/15 switched to ProcessWire namespace
- *
+ * @since 1.1.5 2021/10/10 set field value to 0 if the color parameter is null as a result of showEmpty option enabled on spectrum, bugfix (workaround): something went wrong in javascript spectrum
+ * 
  * made for ProcessWire 3.x by Ryan Cramer
  * https://processwire.com
  * 
@@ -38,7 +39,7 @@ class InputfieldColor extends Inputfield {
 		return array(
 			'title' => __('Color', __FILE__), // Module Title
 			'summary' => __('Inputfield for colors', __FILE__), // Module Summary
-			'version' => 114,
+			'version' => 115,
 			'href' => 'https://processwire.com/talk/topic/16679-fieldtypecolor/'
 			);
 	}
@@ -219,10 +220,11 @@ class InputfieldColor extends Inputfield {
 				    $options
 				    color: \"$value\",
 				    change: function(color) {
-				    	this.value = color.toHex8String();
-				    },
-				    move: function(color) {
-				    	this.value = color.toHex8String();
+				    	if (color === null) {
+					    	this.value = 0;
+						} else {
+					    	this.value = color.toHex8String(); 
+						}
 				    }
 				});
 			</script>
@@ -245,6 +247,7 @@ class InputfieldColor extends Inputfield {
 		parent::___processInput($input);
 		$value = $this->attr('value');
 		if (!$value) return $this;
+		// bugfix (workaround): something went wrong in javascript spectrum
 		if (is_string($value) && in_array($value, ['hsva(0, 0%, 0%, 0)','hsla(0, 0%, 0%, 0)','rgba(0, 0, 0, 0)'])) { 
 			$this->attr('value', '00000000');
 			return $this;
