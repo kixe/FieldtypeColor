@@ -7,10 +7,11 @@
  * @copyright © 2020 Christoph Thelen
  * @license Licensed under GNU/GPL v3
  * @link https://processwire.com/talk/topic/...
- * @version 1.0.0
+ * @version 1.0.2
  *
  * @since 1.0.0 2020/05/14 - init
  * @since 1.0.1 2020/05/23 - mark selected items in select multiple via css rather than js
+ * @since 1.0.2 2022/09/15 - fixed Issue #8
  *
  * made for ProcessWire 3.x, by Ryan Cramer
  * https://processwire.com
@@ -26,7 +27,7 @@ class FieldtypeOptionsColor extends FieldtypeOptions implements Module {
 		return array(
 			'title' => __('Select Color Options', __FILE__),
 			'summary' => __('Field that stores colors as single and multi select options.', __FILE__),
-			'version' => 101,
+			'version' => 102,
 			// requirement prevents unintended deletion of db table fieldtype_options
 			'requires' => array('FieldtypeOptions'),
 			'installs' => array('FieldtypeOptions')
@@ -117,10 +118,10 @@ class FieldtypeOptionsColor extends FieldtypeOptions implements Module {
 		if($field->initValue) {
 			$value = $page->getUnformatted($field->name); 
 			if($field->required && !$field->requiredIf) {
-				if(empty($value) || !count($value)) {
+				if(empty($value) || (is_array($value) && !count($value))) {
 					$page->set($field->name, $field->initValue);
 				}
-			} else if($this->wire('process') != 'ProcessField' && !count($value)) {
+			} else if($this->wire('process') != 'ProcessField' && (empty($value) || (is_array($value) && !count($value)))) {
 				$this->warning(
 					$field->getLabel() . " ($field->name): " . 
 					$this->_('Configured pre-selection not populated since value is not always required. Please correct this field configuration.') 
