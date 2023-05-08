@@ -79,6 +79,22 @@ The Fieldtype includes
 
 Any custom Javascript based Inputfield can be used.
 
+If the **Inputfield** is **used as is** e.g. for Module Settings, the following properties are provided:
+
+```
+$f->wire('modules')->get('InputfieldColor);
+$f->inputType = 0; // int 0 - 4
+$f->alpha = 0; // int 0 or 1, will be set automatically dependend on inputType. To disable explicitly for inputType = 3 (spectrum color picker) set to bool false
+$f->spectrum =  ''; // options for spectrum Color Picker if inputType = 3 @see https://bgrins.github.io/spectrum/
+
+// properties for inputType = 4 only
+$f->initJS = ''; // initial JS
+$f->fileJS = ''; // path to JS file
+$f->fileCSS = ''; // path to CSS file
+$f->jqueryCore = 0; // enable jqueryCore
+$f->jqueryUI = 0; // enable jqueryUI
+```
+
 ---
 
 Fieldtype Select Color Options
