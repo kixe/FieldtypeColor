@@ -1,9 +1,9 @@
-input[type=color].FieldtypeColor, input[type=color]#Inputfield_defaultValue  {
+.InputfieldColor input[type=color], input[type=color].FieldtypeColor, input[type=color]#Inputfield_defaultValue  {
 	height:2em;
 	padding:0;
 }
 
-.AdminThemeUikit input[type=color].FieldtypeColor, .AdminThemeUikit input[type=color]#Inputfield_defaultValue  {
+.AdminThemeUikit .InputfieldColor input[type=color], .AdminThemeUikit input[type=color].FieldtypeColor, .AdminThemeUikit input[type=color]#Inputfield_defaultValue  {
 	height:40px;
 	width: 100% !important;
 }
