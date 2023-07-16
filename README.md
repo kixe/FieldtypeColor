@@ -29,7 +29,11 @@ Define output format under **Details** - Tab in field settings. Select from the 
 + *string* CSS color value **HSLA**. Example: **'hsla(227, 69.2%, 56.7%, 0.98)'**
 + *string* 32bit raw hex value. Example: **'fa4496dd'** (unformatted output value)
 + *int 32bit*. Example: **'4198799069'** (storage value)
-+ *array()*
++ *array(R,G,B)*
++ *array(R,G,B,Alpha)*
++ *array(H,S,L)*
++ *array(H,S,L,Alpha)*
+
 
 ```
 	array(
