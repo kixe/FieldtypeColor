@@ -162,7 +162,7 @@ class InputfieldColor extends Inputfield {
 	}
 
 	public function ___render() {
-		if ($this->value === "" && strlen($this->initValue)) $this->value = $this->initValue;
+		if ($this->value === "" && strlen($this->initValue ?? '')) $this->value = $this->initValue;
 		if (!$this->value) $this->value = null;
 
 		if ($this->value) {
