@@ -320,7 +320,7 @@ class FieldtypeColor extends Fieldtype {
 
 		$f->description = $this->_('This value is assigned as the default for blank fields and on newly created pages.');
 		$f->collapsed = Inputfield::collapsedBlank;
-		$f->attr('value', strlen($field->defaultValue) ? $this->sanitizeValue($this->wire('page'), $field, $field->defaultValue) : null);
+		$f->attr('value', strlen($field->defaultValue ?? '') ? $this->sanitizeValue($this->wire('page'), $field, $field->defaultValue) : null);
 
 		$inputfields->add($f); 
 		
