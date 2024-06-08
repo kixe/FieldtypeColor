@@ -31,6 +31,7 @@
  * @since 1.1.8 2023/07/17 added output format option: array([0,255], [0,255], [0,255]) indexed array: H,S,L
  * @since 1.1.9 2023/10/03 update sanitizeValue() formatColorString()
  * @since 1.2.0 2024/03/27 fixed PHP 8.1 deprecation warning on strlen()
+ * @since 1.2.1 2024/06/08 fixed PHP 8.1 deprecation warning hexdec()
  * 
  * 
  * made for ProcessWire 3.x by Ryan Cramer
@@ -43,11 +44,12 @@ class FieldtypeColor extends Fieldtype {
 	public static function getModuleInfo() {
 		return array(
 			'title' => 'Color',
-			'version' => 120,
+			'version' => 121,
 			'summary' => 'Field that stores a color value as 32bit integer reflecting a RGBA value. Many options for Input (HTML5 Inputfield Color, Textfield with changing background, various jQuery/JS ColorPickers, custom jQuery/JS/CSS) and Output (RGB, RGBA, HSL, HSLA, HEX, Array).',
 			'installs' => 'InputfieldColor',
-			'href' => 'https://processwire.com/talk/topic/16679-fieldtypecolor/'
-			);
+			'href' => 'https://processwire.com/talk/topic/16679-fieldtypecolor/',
+			'requires' => 'PHP>=7.2.0'
+		);
 	}
 
 	public function ___getCompatibleFieldtypes(Field $field) {
@@ -82,7 +84,7 @@ class FieldtypeColor extends Fieldtype {
 	}
 
 	public function sleepValue(Page $page, Field $field, $value) {
-		return hexdec($value);
+		return hexdec($value ?? '');
 	}
 
 	public function wakeupValue(Page $page, Field $field, $value) {
