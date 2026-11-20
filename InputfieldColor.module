@@ -82,7 +82,7 @@ class InputfieldColor extends Inputfield {
 	 * @return $this
 	 *
 	 */
-	public function renderReady(Inputfield $parent = null, $renderValueMode = false) {
+	public function renderReady(?Inputfield $parent = null, $renderValueMode = false) {
 		$url = $this->config->urls->get('InputfieldColor');
 		switch ($this->inputType) {	
 			case 3:
